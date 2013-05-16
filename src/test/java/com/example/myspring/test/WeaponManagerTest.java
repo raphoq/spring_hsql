@@ -12,7 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.myspring.domain.Weapon;
+import com.example.myspring.domain.Bullet;
 import com.example.myspring.service.WeaponManager;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -24,36 +24,35 @@ public class WeaponManagerTest {
 	@Autowired
 	WeaponManager weaponManager;
 
-	private final Integer[] ids = {1,2,3,4};
-	private final String[] names = {"MP5", "Ak 47", "Desert Eagle"};
-	private final String[] producer = {"Germany", "ZSSR", "USA"};
+	private final Integer[] pin = {1,2,3,4};
+	private final String[] bullet_names = {"7.62 x 51mm NATO", "5,56 × 45 mm", "9 x 19 mm Parabellum", "12,7 mm NATO"}; 
 
 	
 	
 	@Test
-	public void addWeaponCheck() {
+	public void addBulletCheck() {
 
-		List<Weapon> retrievedAllWeapons = weaponManager.getAllWeapons();
+		List<Bullet> retrievedAllBullets = weaponManager.getAllBullets();
 
 		// If there is a client with PIN_1 delete it
-		for (Weapon weapon : retrievedAllWeapons) {
-			if (weapon.getId() == ids[0]) {
-				weaponManager.deleteWeapon(weapon);
+		for (Bullet bullet : retrievedAllBullets) {
+			if (bullet.getPin() == pin[0]) {
+				weaponManager.deleteBullet(bullet);
 			}
 		}
 
-		Weapon weapon = new Weapon();
-		weapon.setId(ids[0]);
-		weapon.setName(names[0]);
-		weapon.setProducer(producer[0]);
+		
+		Bullet bulletNew = new Bullet();
+		bulletNew.setName(bullet_names[0]);
+		bulletNew.setPin(pin[0]);
 
 		// Pin is Unique
-		weaponManager.addWeapon(weapon);
+		weaponManager.addBullet(bulletNew);
 
-		Weapon retrievedWeapons = weaponManager.findWeaponById(ids[0]);
+		Bullet retrievedBullets = weaponManager.findBulletByPin(pin[0]);
 
-		assertEquals(ids[0], retrievedWeapons.getId());
-		assertEquals(names[0], retrievedWeapons.getName());
+		assertEquals(pin[0], retrievedBullets.getPin());
+		assertEquals(bullet_names[0], retrievedBullets.getName());
 		// ... check other properties here
 	}
 

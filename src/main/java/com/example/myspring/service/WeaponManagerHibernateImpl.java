@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.myspring.domain.Weapon;
+import com.example.myspring.domain.Bullet;
 
 @Component
 @Transactional
@@ -26,27 +26,28 @@ public class WeaponManagerHibernateImpl implements WeaponManager {
 	}
 	
 	@Override
-	public void addWeapon(Weapon weapon) {
-		sessionFactory.getCurrentSession().persist(weapon);
+	public void addBullet(Bullet bullet) {
+		bullet.setId(null);
+		sessionFactory.getCurrentSession().persist(bullet);
 	}
 	
 	@Override
-	public void deleteWeapon(Weapon weapon) {
-		weapon = (Weapon) sessionFactory.getCurrentSession().get(Weapon.class, weapon.getId());
-		
-		sessionFactory.getCurrentSession().delete(weapon);
+	public void deleteBullet(Bullet bullet) {
+		bullet = (Bullet) sessionFactory.getCurrentSession().get(Bullet.class, bullet.getId());
+		sessionFactory.getCurrentSession().delete(bullet);
+		sessionFactory.getCurrentSession().flush();
 	}
 
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<Weapon> getAllWeapons() {
-		return sessionFactory.getCurrentSession().getNamedQuery("weapon.all").list();
+	public List<Bullet> getAllBullets() {
+		return sessionFactory.getCurrentSession().getNamedQuery("bullet.all").list();
 	}
 
 	@Override
-	public Weapon findWeaponById(Integer id) {
-		return (Weapon) sessionFactory.getCurrentSession().getNamedQuery("weapon.byId").setInteger("id", id).uniqueResult();
+	public Bullet findBulletByPin(Integer pin) {
+		return (Bullet) sessionFactory.getCurrentSession().getNamedQuery("bullet.byPin").setInteger("pin", pin).uniqueResult();
 	}
 
 
