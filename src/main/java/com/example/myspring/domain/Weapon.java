@@ -14,33 +14,34 @@ import javax.persistence.NamedQuery;
 })
 public class Weapon {
 
-	private Integer id;
-	private String name;
-	private String producer;
+	private Long id;
+	private String model;
+	private String make;
 
 	@Id
-	public Integer getId() {
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
-	public String getName() {
-		return name;
+	public String getMake() {
+		return make;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setMake(String make) {
+		this.make = make;
 	}
 
-	public String getProducer() {
-		return producer;
+	public String getModel() {
+		return model;
 	}
 
-	public void setProducer(String producer) {
-		this.producer = producer;
+	public void setModel(String model) {
+		this.model = model;
 	}
 
 }
