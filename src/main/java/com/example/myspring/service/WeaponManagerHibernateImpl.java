@@ -34,7 +34,7 @@ public class WeaponManagerHibernateImpl implements WeaponManager {
 	
 	@Override
 	public Bullet deleteBullet(Bullet bullet) {
-		bullet = (Bullet) sessionFactory.getCurrentSession().get(Bullet.class, findBulletByPin(bullet.getPin()).getId());
+		bullet = (Bullet) sessionFactory.getCurrentSession().get(Bullet.class, bullet.getId());
 		sessionFactory.getCurrentSession().delete(bullet);
 		sessionFactory.getCurrentSession().flush();
 		return bullet;
@@ -54,7 +54,7 @@ public class WeaponManagerHibernateImpl implements WeaponManager {
 
 	@Override
 	public void updateBullet(Bullet bullet) {
-		Bullet newBullet = (Bullet) sessionFactory.getCurrentSession().get(Bullet.class, findBulletByPin(bullet.getPin()).getId());
+		Bullet newBullet = (Bullet) sessionFactory.getCurrentSession().get(Bullet.class, bullet.getId());
 		newBullet.setName(bullet.getName());
 		sessionFactory.getCurrentSession().update(newBullet);
 	}
@@ -70,6 +70,14 @@ public class WeaponManagerHibernateImpl implements WeaponManager {
 		sessionFactory.getCurrentSession().persist(weapon);
 		return weapon.getId();
 	}
+	
+	@Override
+	public Weapon deleteWeapon(Weapon weapon) {
+		weapon = (Weapon) sessionFactory.getCurrentSession().get(Weapon.class, weapon.getId());
+		sessionFactory.getCurrentSession().delete(weapon);
+		sessionFactory.getCurrentSession().flush();
+		return weapon;
+	}
 
 	@Override
 	public List<Weapon> getAvailableWeapons() {
@@ -83,9 +91,13 @@ public class WeaponManagerHibernateImpl implements WeaponManager {
 	}
 
 	@Override
+	public Weapon findWeaponByPin(Integer pin) {
+		return (Weapon) sessionFactory.getCurrentSession().getNamedQuery("weapon.byPin").setInteger("pin", pin).uniqueResult();
+	}
+	
+	@Override
 	public List<Weapon> getLoadedWeapons(Bullet bullet) {
-		bullet = (Bullet) sessionFactory.getCurrentSession().get(Bullet.class,
-				bullet.getId());
+		bullet = (Bullet) sessionFactory.getCurrentSession().get(Bullet.class, bullet.getId());
 		
 		// lazy loading here - try this code without (shallow) copying
 		List<Weapon> weapons = new ArrayList<Weapon>(bullet.getWeapons());
@@ -121,5 +133,7 @@ public class WeaponManagerHibernateImpl implements WeaponManager {
 			bullet.getWeapons().remove(toRemove);
 		
 	}
+
+
 
 }

@@ -21,6 +21,7 @@ import com.example.myspring.domain.Weapon;
 		@NamedQuery(name = "bullet.all", query = "Select b from Bullet b"),
 		@NamedQuery(name = "bullet.byPin", query = "Select b from Bullet b where b.pin = :pin"),
 		@NamedQuery(name = "bullet.byId", query = "Select b from Bullet b where b.id = :id")
+		//SELECT model FROM Weapon WHERE id IN (SELECT weapons_id FROM BULLET_WEAPON WHERE bullet_id = 31)
 })
 public class Bullet {
 

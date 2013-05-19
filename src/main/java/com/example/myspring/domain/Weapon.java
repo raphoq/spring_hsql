@@ -10,13 +10,15 @@ import javax.persistence.NamedQuery;
 @Entity
 @NamedQueries({
 		@NamedQuery(name = "weapon.all", query = "Select w from Weapon w"),
-		@NamedQuery(name = "weapon.byId", query = "Select w from Weapon w where w.id = :id")
+		@NamedQuery(name = "weapon.byId", query = "Select w from Weapon w where w.id = :id"),
+		@NamedQuery(name = "weapon.byPin", query = "Select w from Weapon w where w.pin = :pin")
 })
 public class Weapon {
 
 	private Long id;
 	private String model;
 	private String make;
+	private Integer pin;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -42,6 +44,14 @@ public class Weapon {
 
 	public void setModel(String model) {
 		this.model = model;
+	}
+
+	public Integer getPin() {
+		return pin;
+	}
+
+	public void setPin(Integer pin) {
+		this.pin = pin;
 	}
 
 }

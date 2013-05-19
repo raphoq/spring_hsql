@@ -13,13 +13,15 @@ public interface WeaponManager {
 	void updateBullet(Bullet bullet);
 	Bullet findBulletByPin(Integer pin);
 	Bullet findBulletById(Long id);
-
+	
 	Long addWeapon(Weapon weapon);
+	Weapon deleteWeapon(Weapon weapon);
 	List<Weapon> getAvailableWeapons();
 	Weapon findWeaponById(Long id);
+	Weapon findWeaponByPin(Integer id);
 	
 	void unloadBullet(Bullet bullet, Weapon weapon);
 	List<Weapon> getLoadedWeapons(Bullet bullet);
-	void loadBullet(Long bulletId, Long carId);
+	void loadBullet(Long bulletId, Long weaponId);
 	
 }
