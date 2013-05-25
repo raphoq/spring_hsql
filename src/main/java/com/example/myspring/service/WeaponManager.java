@@ -17,6 +17,7 @@ public interface WeaponManager {
 	Long addWeapon(Weapon weapon);
 	Weapon deleteWeapon(Weapon weapon);
 	List<Weapon> getAvailableWeapons();
+	void updateWeapon(Weapon weapon);
 	Weapon findWeaponById(Long id);
 	Weapon findWeaponByPin(Integer id);
 	

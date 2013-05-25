@@ -25,14 +25,14 @@ public class WeaponManagerTest {
 	@Autowired
 	WeaponManager weaponManager;
 
-	private final Integer[] bullet_pins = {1,2,3,4,5,6};
-	private final String[] bullet_names = {"7.62 x 51mm NATO", "5,56 × 45 mm", "9 x 19 mm Parabellum", "12,7 mm NATO", ".408 CheyTac", "5,7 x 28 mm FN-P90"}; 
-	private final Integer[] weapon_pins = {1,2,3,4,5,6};
-	private final String[] weapon_names = {"G3", "M4A1", "MP5", "M107", "M200 Intervention", "Five-seveN"};
-	private final String[] weapon_makes = {"Heckler und Koch GmbH", "Colt's Manufacturing Company", "Heckler und Koch GmbH", "Barrett Firearms Manufacturing", "CheyTac LLC", "Fabrique Nationale de Herstal"};
+	private final Integer[] bullet_pins = {1,2,3,4,5,6,7,8,9};
+	private final String[] bullet_names = {"7.62 x 51mm NATO", "5,56 × 45 mm", "9 x 19 mm Parabellum", "12,7 mm NATO", ".408 CheyTac", ".308 CheyTac", "5,7 x 28 mm FN-P90", "7,62 × 63 mm Springfield"}; 
+	private final Integer[] weapon_pins = {1,2,3,4,5,6,7,8,9,10};
+	private final String[] weapon_names = {"G3", "M4A1", "MP5", "M107", "M200 Intervention", "M200 Intervention", "Five-seveN", "M1 Garand", "Springfield"};
+	private final String[] weapon_makes = {"Heckler und Koch GmbH", "Colt's Manufacturing Company", "Heckler und Koch GmbH", "Barrett Firearms Manufacturing", "CheyTac LLC", "CheyTac LLC", "Fabrique Nationale de Herstal", "USA", "USA"};
 	
 	@Test
-	public void findByIdCheck() {
+	public void findBulletByIdCheck() {
 		
 		Bullet bulletToFind = new Bullet();
 		bulletToFind.setName(bullet_names[3]);
@@ -67,7 +67,6 @@ public class WeaponManagerTest {
 		
 		List<Bullet> retrievedBullets = weaponManager.getAllBullets();
 
-		// If there is a client with PIN_1 delete it
 		for (Bullet bullet : retrievedBullets) {
 			if (bullet.getPin().equals(bulletToAdd.getPin())) {
 				weaponManager.deleteBullet(bullet);
@@ -161,6 +160,36 @@ public class WeaponManagerTest {
 	/////////////////////////////////////
 	/*     RELATIONS TEST BOTTOM	   */
 	/////////////////////////////////////
+	
+	@Test
+	public void findWeaponByIdCheck() {
+		
+		Weapon weaponToFind = new Weapon();
+		weaponToFind.setModel(weapon_names[3]);
+		weaponToFind.setModel(weapon_makes[3]);
+		weaponToFind.setPin(weapon_pins[3]);
+		
+		List<Weapon> retrievedAllWeapons = weaponManager.getAvailableWeapons();
+		
+		Boolean inDb = false;
+		for (Weapon weapon : retrievedAllWeapons) {
+			if (weapon.getPin() == weaponToFind.getPin()) {
+				inDb = true;
+			}
+		}
+		if (inDb == false) {
+			weaponManager.addWeapon(weaponToFind);
+		}
+		
+		Long newId = weaponManager.findWeaponByPin(weaponToFind.getPin()).getId();
+		
+		assertEquals(weaponManager.findWeaponByPin(weaponToFind.getPin()), weaponManager.findWeaponById(newId));
+		
+		if (inDb == false ) {
+			weaponManager.deleteWeapon(weaponToFind);
+		}
+	}
+	
 	@Test
 	public void addWeaponCheck() {
 		Weapon weaponToAdd = new Weapon();
@@ -186,6 +215,85 @@ public class WeaponManagerTest {
 	}
 	
 	@Test
+	public void delWeaponCheck() {
+		
+		Weapon weaponToDelete = new Weapon();
+		weaponToDelete.setMake(weapon_names[1]);
+		weaponToDelete.setModel(weapon_makes[1]);
+		weaponToDelete.setPin(weapon_pins[1]);
+		
+		List<Weapon> retrievedAllWeapons = weaponManager.getAvailableWeapons();
+		
+		Weapon retrievedWeapon = null;
+		Boolean inDb = false;
+		for (Weapon weapon : retrievedAllWeapons) {
+			if (weapon.getPin() == weaponToDelete.getPin()) {
+				inDb = true;
+				retrievedWeapon = weapon;
+			}
+		}
+		if (inDb == false) {
+			weaponManager.addWeapon(weaponToDelete);
+			retrievedWeapon = weaponManager.findWeaponByPin(weaponToDelete.getPin());
+		}
+		
+		List<Weapon> retrievedBeforeDelete = weaponManager.getAvailableWeapons();
+		
+		weaponManager.deleteWeapon(retrievedWeapon);
+		
+		List<Weapon> retrievedAfterDelete = weaponManager.getAvailableWeapons();
+		
+		assertNull(weaponManager.findWeaponByPin(retrievedWeapon.getPin()));
+		assertEquals(retrievedBeforeDelete.size() - 1, retrievedAfterDelete.size());
+	}
+	
+	@Test
+	public void updWeaponCheck() {
+		Weapon weaponToUpdate = new Weapon();
+		weaponToUpdate.setModel(weapon_names[2]);
+		weaponToUpdate.setMake(weapon_makes[2]);
+		weaponToUpdate.setPin(bullet_pins[2]);
+		
+		List<Weapon> retrievedAllWeapons = weaponManager.getAvailableWeapons();
+		
+		Weapon retrievedWeapon = null;
+		Boolean inDb = false;
+		for (Weapon weapon : retrievedAllWeapons) {
+			if (weapon.getPin() == weaponToUpdate.getPin()) {
+				inDb = true;
+				retrievedWeapon = weapon;
+			}
+		}
+		if (inDb == false) {
+			weaponManager.addWeapon(weaponToUpdate);
+			retrievedWeapon = weaponManager.findWeaponByPin(weaponToUpdate.getPin());
+		}
+		
+		List<Weapon> retrievedBeforeUpdate = weaponManager.getAvailableWeapons();
+		
+		weaponToUpdate.setModel("Update Work");
+		weaponManager.updateWeapon(retrievedWeapon);
+		
+		List<Weapon> retrievedAfterUpdate = weaponManager.getAvailableWeapons();
+		
+		for (int i = 0; i < retrievedBeforeUpdate.size(); i++) {
+			if (retrievedAfterUpdate.get(i).getPin().equals(retrievedWeapon.getPin())) {
+				assertEquals(retrievedAfterUpdate.get(i).getModel(), retrievedWeapon.getModel());
+				assertEquals(retrievedAfterUpdate.get(i).getMake(), retrievedWeapon.getMake());
+			} else {
+				assertTrue(retrievedAfterUpdate.contains(retrievedBeforeUpdate.get(i)));
+			}
+		}
+		
+		if (inDb == false) {
+			weaponManager.deleteWeapon(retrievedWeapon);
+		}
+	}
+	
+	////////////////////
+	// Join table tests
+	
+	@Test
 	public void loadBulletCheck() {
 
 		Bullet bulletToLoad = new Bullet();
@@ -204,7 +312,7 @@ public class WeaponManagerTest {
 		}
 		if (inDb == false) {
 			weaponManager.addBullet(bulletToLoad);
-			weaponManager.findBulletByPin(bulletToLoad.getPin());
+			retrievedBullet = weaponManager.findBulletByPin(bulletToLoad.getPin());
 		}
 		
 		Weapon weaponToLoad = new Weapon();
@@ -235,7 +343,9 @@ public class WeaponManagerTest {
 		
 		if (inDb == false ) {
 			weaponManager.loadBullet(retrievedBullet.getId(), weaponId);
+			
 		}
+		
 		
 		List<Weapon> loadedWeapons = weaponManager.getLoadedWeapons(retrievedBullet);
 
@@ -244,12 +354,12 @@ public class WeaponManagerTest {
 		assertTrue(loadedWeapons.contains(loadedWeapon));
 		
 	}
-
+	
 	@Test
 	public void unloadBulletCheck() {
 		Bullet bulletToLoad = new Bullet();
-		bulletToLoad.setName(bullet_names[5]);
-		bulletToLoad.setPin(bullet_pins[5]);
+		bulletToLoad.setName(bullet_names[6]);
+		bulletToLoad.setPin(bullet_pins[6]);
 		
 		List<Bullet> retrievedAllBullets = weaponManager.getAllBullets();
 		
@@ -267,9 +377,9 @@ public class WeaponManagerTest {
 		}
 		
 		Weapon weaponToLoad = new Weapon();
-		weaponToLoad.setModel(weapon_names[5]);
-		weaponToLoad.setMake(weapon_makes[5]);
-		weaponToLoad.setPin(weapon_pins[5]);
+		weaponToLoad.setModel(weapon_names[6]);
+		weaponToLoad.setMake(weapon_makes[6]);
+		weaponToLoad.setPin(weapon_pins[6]);
 		
 		List<Weapon> retrievedAllWeapons = weaponManager.getAvailableWeapons();
 		Long weaponId = null;
@@ -307,6 +417,101 @@ public class WeaponManagerTest {
 		
 		assertFalse(retrievedAfterUnload.contains(retrievedWeapon));
 		assertEquals(retrievedBeforeUnload.size() - 1, retrievedAfterUnload.size());
+		
+	}
+	
+	
+	// Test na X z Y
+	@Test
+	public void getLoadedWeaponCheck() {
+		Bullet bulletToLoad = new Bullet();
+		bulletToLoad.setName(bullet_names[7]);
+		bulletToLoad.setPin(bullet_pins[7]);
+		
+		List<Bullet> retrievedAllBullets = weaponManager.getAllBullets();
+		
+		Bullet retrievedBullet = null;
+		Boolean inDb = false;
+		for (Bullet bullet : retrievedAllBullets) {
+			if (bullet.getPin() == bulletToLoad.getPin()) {
+				inDb = true;
+				retrievedBullet = bullet;
+			}
+		}
+		if (inDb == false) {
+			weaponManager.addBullet(bulletToLoad);
+			retrievedBullet = weaponManager.findBulletByPin(bulletToLoad.getPin());
+		}
+		
+		Weapon weaponToLoad = new Weapon();
+		weaponToLoad.setModel(weapon_names[7]);
+		weaponToLoad.setMake(weapon_makes[7]);
+		weaponToLoad.setPin(weapon_pins[7]);
+		Weapon weaponToLoad1 = new Weapon();
+		weaponToLoad1.setModel(weapon_names[8]);
+		weaponToLoad1.setMake(weapon_makes[8]);
+		weaponToLoad1.setPin(weapon_pins[8]);
+		
+		List<Weapon> retrievedAllWeapons = weaponManager.getAvailableWeapons();
+		Long weaponId = null;
+		Long weaponId1 = null;
+		
+		inDb = false;
+		Boolean inDb1 = false;
+		for (Weapon weapon : retrievedAllWeapons) {
+			if (weapon.getPin() == weaponToLoad.getPin()) {
+				inDb = true;
+				weaponId = weapon.getId();
+			}
+			if (weapon.getPin() == weaponToLoad1.getPin()) {
+				inDb1 = true;
+				weaponId1 = weapon.getId();
+			}
+		}
+		if (inDb == false) {
+			weaponId = weaponManager.addWeapon(weaponToLoad);
+		}
+		if (inDb1 == false) {
+			weaponId1 = weaponManager.addWeapon(weaponToLoad1);
+		}
+
+		inDb = false;
+		for (Weapon weapon : weaponManager.getLoadedWeapons(retrievedBullet)) {
+			if (weapon.getPin() == weaponToLoad.getPin()) {
+				inDb = true;
+			}
+		}
+		inDb1 = false;
+		for (Weapon weapon : weaponManager.getLoadedWeapons(retrievedBullet)) {
+			if (weapon.getPin() == weaponToLoad1.getPin()) {
+				inDb1 = true;
+			}
+		}
+		
+		
+		
+		///////////////////
+		// Test Prepared //
+		///////////////////
+		
+		List<Weapon> loadedWeaponsCount = weaponManager.getLoadedWeapons(retrievedBullet);
+		int weaponsCount = loadedWeaponsCount.size();
+		
+		if (inDb == false) {
+			weaponManager.loadBullet(retrievedBullet.getId(), weaponId);
+		}
+		if (inDb1 == false) {
+			weaponManager.loadBullet(retrievedBullet.getId(), weaponId1);
+		}
+		
+		
+		List<Weapon> loadedWeapons = weaponManager.getLoadedWeapons(retrievedBullet);
+
+		Weapon loadedWeapon = weaponManager.findWeaponByPin(weaponToLoad.getPin());
+		Weapon loadedWeapon1 = weaponManager.findWeaponByPin(weaponToLoad1.getPin());
+		
+		assertTrue(loadedWeapons.contains(loadedWeapon));
+		assertTrue(loadedWeapons.contains(loadedWeapon1));
 		
 	}
 	

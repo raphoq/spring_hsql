@@ -72,6 +72,14 @@ public class WeaponManagerHibernateImpl implements WeaponManager {
 	}
 	
 	@Override
+	public void updateWeapon(Weapon weapon) {
+		Weapon newWeapon = (Weapon) sessionFactory.getCurrentSession().get(Weapon.class, weapon.getId());
+		newWeapon.setModel(weapon.getModel());
+		newWeapon.setMake(weapon.getMake());
+		sessionFactory.getCurrentSession().update(newWeapon);
+	}
+	
+	@Override
 	public Weapon deleteWeapon(Weapon weapon) {
 		weapon = (Weapon) sessionFactory.getCurrentSession().get(Weapon.class, weapon.getId());
 		sessionFactory.getCurrentSession().delete(weapon);
