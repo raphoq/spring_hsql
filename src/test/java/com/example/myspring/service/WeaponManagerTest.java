@@ -25,13 +25,13 @@ public class WeaponManagerTest {
 	@Autowired
 	WeaponManager weaponManager;
 
-	private final Integer[] bullet_pins = {1,2,3,4,5,6,7,8,9};
-	private final String[] bullet_names = {"7.62 x 51mm NATO", "5,56 × 45 mm", "9 x 19 mm Parabellum", "12,7 mm NATO", ".408 CheyTac", ".308 CheyTac", "5,7 x 28 mm FN-P90", "7,62 × 63 mm Springfield"}; 
-	private final Integer[] weapon_pins = {1,2,3,4,5,6,7,8,9,10};
-	private final String[] weapon_names = {"G3", "M4A1", "MP5", "M107", "M200 Intervention", "M200 Intervention", "Five-seveN", "M1 Garand", "Springfield"};
-	private final String[] weapon_makes = {"Heckler und Koch GmbH", "Colt's Manufacturing Company", "Heckler und Koch GmbH", "Barrett Firearms Manufacturing", "CheyTac LLC", "CheyTac LLC", "Fabrique Nationale de Herstal", "USA", "USA"};
+	private final Integer[] bullet_pins = {1,2,3,4,5,6,7,8,9,10,11,12,13};
+	private final String[] bullet_names = {"7.62 x 51mm NATO", "5,56 × 45 mm", "9 x 19 mm Parabellum", "12,7 mm NATO", ".408 CheyTac", ".308 CheyTac", "5,7 x 28 mm FN-P90", "7,62 × 63 mm Springfield", "Magnum", "Shells"}; 
+	private final Integer[] weapon_pins = {1,2,3,4,5,6,7,8,9,10,11,12,13,14};
+	private final String[] weapon_names = {"G3", "M4A1", "MP5", "M107", "M200 Intervention", "M200 Intervention", "Five-seveN", "M1 Garand", "Springfield", "Magnum", "Spas-12", "Shotgun"};
+	private final String[] weapon_makes = {"Heckler und Koch GmbH", "Colt's Manufacturing Company", "Heckler und Koch GmbH", "Barrett Firearms Manufacturing", "CheyTac LLC", "CheyTac LLC", "Fabrique Nationale de Herstal", "USA", "USA", "USA", "Germany", "Germany"};
 	
-	@Test
+	
 	public void findBulletByIdCheck() {
 		
 		Bullet bulletToFind = new Bullet();
@@ -59,8 +59,10 @@ public class WeaponManagerTest {
 		}
 	}
 	
+	
 	@Test
 	public void addBulletCheck() {
+		findBulletByIdCheck();
 		Bullet bulletToAdd = new Bullet();
 		bulletToAdd.setName(bullet_names[0]);
 		bulletToAdd.setPin(bullet_pins[0]);
@@ -514,6 +516,157 @@ public class WeaponManagerTest {
 		assertTrue(loadedWeapons.contains(loadedWeapon1));
 		
 	}
+	
+	
+	@Test
+	public void deleteCascadeCheck() {
+		Bullet bulletToLoad = new Bullet();
+		bulletToLoad.setName(bullet_names[8]);
+		bulletToLoad.setPin(bullet_pins[8]);
+		
+		List<Bullet> retrievedAllBullets = weaponManager.getAllBullets();
+		
+		Bullet retrievedBullet = null;
+		Boolean inDb = false;
+		for (Bullet bullet : retrievedAllBullets) {
+			if (bullet.getPin() == bulletToLoad.getPin()) {
+				inDb = true;
+				retrievedBullet = bullet;
+			}
+		}
+		if (inDb == false) {
+			weaponManager.addBullet(bulletToLoad);
+			retrievedBullet = weaponManager.findBulletByPin(bulletToLoad.getPin());
+		}
+		
+		Weapon weaponToLoad = new Weapon();
+		weaponToLoad.setModel(weapon_names[9]);
+		weaponToLoad.setMake(weapon_makes[9]);
+		weaponToLoad.setPin(weapon_pins[9]);
+		
+		List<Weapon> retrievedAllWeapons = weaponManager.getAvailableWeapons();
+		Long weaponId = null;
+		
+		inDb = false;
+		for (Weapon weapon : retrievedAllWeapons) {
+			if (weapon.getPin() == weaponToLoad.getPin()) {
+				inDb = true;
+				weaponId = weapon.getId();
+			}
+		}
+		if (inDb == false) {
+			weaponId = weaponManager.addWeapon(weaponToLoad);
+		}
+
+		weaponManager.loadBullet(retrievedBullet.getId(), weaponId);
+		
+		///////////////////
+		// Test Prepared //
+		///////////////////
+		
+		
+		int weapons_count = weaponManager.getAvailableWeapons().size();
+		int loaded_weapons_count = weaponManager.getLoadedWeapons(bulletToLoad).size();
+		int weapons_without_loaded = weapons_count - loaded_weapons_count;
+		
+		List<Weapon> weaponsBulletList = weaponManager.getLoadedWeapons(bulletToLoad);
+		weaponManager.deleteBulletCascade(bulletToLoad);
+
+		List<Weapon> weaponsAfterDelete = weaponManager.getAvailableWeapons();
+		
+		assertEquals(weaponsAfterDelete.size(), weapons_without_loaded);
+		
+		
+		for (int i = 0; i < weaponsBulletList.size(); i++) {
+			assertFalse(weaponsAfterDelete.contains(weaponsBulletList.get(i)));
+		}
+		
+	}
+	
+	@Test
+	public void repairWeaponsCheck() {
+		Bullet bulletToLoad = new Bullet();
+		bulletToLoad.setName(bullet_names[9]);
+		bulletToLoad.setPin(bullet_pins[9]);
+		
+		List<Bullet> retrievedAllBullets = weaponManager.getAllBullets();
+		
+		Bullet retrievedBullet = null;
+		Boolean inDb = false;
+		for (Bullet bullet : retrievedAllBullets) {
+			if (bullet.getPin() == bulletToLoad.getPin()) {
+				retrievedBullet = bullet;
+				weaponManager.deleteBulletCascade(retrievedBullet);
+			}
+		}
+		if (inDb == false) {
+			weaponManager.addBullet(bulletToLoad);
+			retrievedBullet = weaponManager.findBulletByPin(bulletToLoad.getPin());
+		}
+		
+		Weapon weaponToLoad = new Weapon();
+		weaponToLoad.setModel(weapon_names[10]);
+		weaponToLoad.setMake(weapon_makes[10]);
+		weaponToLoad.setPin(weapon_pins[10]);
+		Weapon weaponToLoad1 = new Weapon();
+		weaponToLoad1.setModel(weapon_names[11]);
+		weaponToLoad1.setMake(weapon_makes[11]);
+		weaponToLoad1.setPin(weapon_pins[11]);
+		
+		List<Weapon> retrievedAllWeapons = weaponManager.getAvailableWeapons();
+		Long weaponId = null;
+		Long weaponId1 = null;
+		
+		inDb = false;
+		Boolean inDb1 = false;
+		for (Weapon weapon : retrievedAllWeapons) {
+			if (weapon.getPin() == weaponToLoad.getPin()) {
+				inDb = true;
+				weaponId = weapon.getId();
+			}
+			if (weapon.getPin() == weaponToLoad1.getPin()) {
+				inDb1 = true;
+				weaponId1 = weapon.getId();
+			}
+		}
+		if (inDb == false) {
+			weaponId = weaponManager.addWeapon(weaponToLoad);
+		}
+		if (inDb1 == false) {
+			weaponId1 = weaponManager.addWeapon(weaponToLoad1);
+		}
+
+		inDb = false;
+		for (Weapon weapon : weaponManager.getLoadedWeapons(retrievedBullet)) {
+			if (weapon.getPin() == weaponToLoad.getPin()) {
+				inDb = true;
+			}
+		}
+		inDb1 = false;
+		for (Weapon weapon : weaponManager.getLoadedWeapons(retrievedBullet)) {
+			if (weapon.getPin() == weaponToLoad1.getPin()) {
+				inDb1 = true;
+			}
+		}
+		
+		weaponManager.loadBullet(retrievedBullet.getId(), weaponId);
+		weaponManager.loadBullet(retrievedBullet.getId(), weaponId1);
+		
+		// TEST PREPARED
+		
+		weaponManager.repairWeapons(bulletToLoad);
+		
+		List<Weapon> weaponsAfterRepair = weaponManager.getLoadedWeapons(bulletToLoad);
+		
+		for (int i = 0; i < weaponsAfterRepair.size(); i++) {
+			assertTrue(weaponsAfterRepair.get(i).getModel().contains("REPEAIRED"));
+			
+		}
+		
+	}
+	
+	
+	
 	
 
 }

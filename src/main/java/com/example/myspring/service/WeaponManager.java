@@ -10,9 +10,11 @@ public interface WeaponManager {
 	void addBullet(Bullet bullet);
 	List<Bullet> getAllBullets();
 	Bullet deleteBullet(Bullet bullet);
+	void deleteBulletCascade(Bullet bullet);
 	void updateBullet(Bullet bullet);
 	Bullet findBulletByPin(Integer pin);
 	Bullet findBulletById(Long id);
+	void repairWeapons(Bullet bullet);
 	
 	Long addWeapon(Weapon weapon);
 	Weapon deleteWeapon(Weapon weapon);

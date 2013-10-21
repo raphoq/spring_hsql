@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.SessionFactory;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +18,7 @@ import com.example.myspring.domain.Weapon;
 public class WeaponManagerHibernateImpl implements WeaponManager {
 
 	@Autowired
-	private SessionFactory sessionFactory;
+	public SessionFactory sessionFactory;
 
 	public SessionFactory getSessionFactory() {
 		return sessionFactory;
@@ -39,7 +41,36 @@ public class WeaponManagerHibernateImpl implements WeaponManager {
 		sessionFactory.getCurrentSession().flush();
 		return bullet;
 	}
+	
+	@Override
+	@Cascade(CascadeType.DELETE)
+	public void deleteBulletCascade(Bullet bullet) {
+		bullet = (Bullet) sessionFactory.getCurrentSession().get(Bullet.class, bullet.getId());
+		
+//		List<Weapon> weapons = getLoadedWeapons(bullet);
+//		
+//		for (int i = 0; i < weapons.size(); i++) {
+//			unloadBullet(bullet, weapons.get(i));
+//			deleteWeapon(weapons.get(i));
+//		}
+		
+		sessionFactory.getCurrentSession().delete(bullet);
+		sessionFactory.getCurrentSession().flush();
+	}
 
+	@Override
+	public void repairWeapons(Bullet bullet) {
+		bullet = (Bullet) sessionFactory.getCurrentSession().get(Bullet.class, bullet.getId());
+		
+		List<Weapon> weapons = getLoadedWeapons(bullet);
+		
+		for (int i = 0; i < weapons.size(); i++) {
+			Weapon one_weapon = weapons.get(i);
+			one_weapon.setModel("REPEAIRED " + one_weapon.getModel());
+			sessionFactory.getCurrentSession().update(one_weapon);
+		}
+	}
+	
 
 	@Override
 	@SuppressWarnings("unchecked")
